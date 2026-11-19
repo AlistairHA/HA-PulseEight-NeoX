@@ -1,10 +1,31 @@
+<p align="center"><a href="https://www.pulse-eight.com/p/214/neox"><img src="https://www.pulse-eight.com/generated-assets/products/0000684_555.png" alt="Pulse-Eight neo:X+ matrix" width="520"></a></p>
+
 # Pulse-Eight neo Matrix for Home Assistant
 
-A custom integration and control panel for **Pulse-Eight neo video matrices**. It's built for the **neo:X+** (model code FF88SA), and is written to also handle neo:X, neo:XMR, neo:XSR, neo:8/8a, neo:6a and neo:4. It talks to the matrix directly on your LAN over its HTTP/JSON API. No cloud account is needed.
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://hacs.xyz/docs/faq/custom_repositories) [![Release](https://img.shields.io/github/v/release/AlistairHA/HA-PulseEight-NeoX)](https://github.com/AlistairHA/HA-PulseEight-NeoX/releases) ![Home Assistant 2025.1+](https://img.shields.io/badge/Home%20Assistant-2025.1%2B-03A9F4.svg) ![Local control](https://img.shields.io/badge/IoT-local%20only-4CAF50.svg)
 
-It shares its design with the ProAmp8 and ProAudio integrations, so the three panels look and behave alike.
+Control your **Pulse-Eight neo video matrix** from Home Assistant: route any source to any screen with drag and drop, switch TVs on and off over HDMI-CEC, and keep an eye on every HDBaseT link. Built for the **neo:X+** (FF88SA) and written to also handle the neo:X, neo:XMR, neo:XSR, neo:8/8a, neo:6a and neo:4. Everything runs locally on your LAN; no cloud account is needed.
+
+[![Open your Home Assistant instance and open this repository in HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=AlistairHA&repository=HA-PulseEight-NeoX&category=integration)
+
+## Highlights
+
+- **Routing panel** in the sidebar: drag outputs onto a source, send one source to many screens, move or clear whole groups, with undo.
+- **Instant updates** from the matrix's own state broadcasts, so changes made from its web UI or remote show up within a second.
+- **One device per output** with a media player (source + CEC power + volume), display remote, video format and HDBaseT link-quality sensors.
+- **Presets and groups** ("Movie night", "Sky everywhere", Downstairs/Upstairs) as buttons and actions for automations.
+- **Health**: temperatures, power-supply rails, status LEDs, CEC settings and per-input EDID profiles.
+- **Auto-discovery** of neo matrices on your network.
 
 ![Routing](docs/routing.png)
+
+## Supported hardware
+
+| | Model | Notes |
+|---|---|---|
+| <a href="https://www.pulse-eight.com/p/214/neox"><img src="https://www.pulse-eight.com/generated-assets/products/0000837_555.jpeg" alt="neo:X+ front and rear" width="200"></a> | [**neo:X+**](https://www.pulse-eight.com/p/214/neox) (FF88SA) | Tested against the official API docs and a simulator; please report results on real hardware |
+| <a href="https://www.pulse-eight.com/p/226/neoultra-receiver"><img src="https://www.pulse-eight.com/generated-assets/products/0000734_555.jpeg" alt="neo:Ultra receivers" width="200"></a> | [**neo:Ultra**](https://www.pulse-eight.com/p/226/neoultra-receiver) / neo:Pro / neo:Lite receivers | Link status, MSE per pair, cable length and receiver details on the HDBaseT tab |
+| | neo:X, neo:XMR, neo:XSR, neo:8/8a, neo:6a, neo:4 | Same API; should work, untested |
 
 ## The **neo Matrix** sidebar panel
 
@@ -53,12 +74,21 @@ The panel works in the HA phone app (long-press to drag), in light and dark them
 
 ## Install
 
-1. Push this folder to its own GitHub repository (HACS allows only one integration per repository). The contents of this folder must sit at the **root** of the GitHub repository (`hacs.json` and `custom_components/` at the top level, not inside a subfolder). HACS installs from GitHub releases: the included *Release* workflow creates one (for example `v1.1.1`) automatically whenever the `version` in `manifest.json` changes on `main`, and you can also run it by hand from the **Actions** tab. Without a release, HACS shows *"'' is not a usable version"*.
-2. In HACS, go to **Custom repositories**, add the repository as type **Integration**, install it and restart Home Assistant. *(Or copy `custom_components/pulse_eight_neo` into `<config>/custom_components/`.)*
-3. Go to **Settings → Devices & services → Add integration → Pulse-Eight neo Matrix**. Enter the matrix IP address and, if your firmware requires it, the web UI **admin password** (the default is `admin`). If the password later stops working, HA asks for it again.
-4. Open **neo Matrix** in the sidebar.
+**HACS (recommended)**
 
-Options let you change the routing/status poll interval (default 5 s) and the detail poll interval for HDBaseT, health and port details (default 60 s).
+1. Click the button below, or in HACS open **⋮ → Custom repositories** and add `https://github.com/AlistairHA/HA-PulseEight-NeoX` as type **Integration**.
+
+   [![Open your Home Assistant instance and open this repository in HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=AlistairHA&repository=HA-PulseEight-NeoX&category=integration)
+2. Download **Pulse-Eight neo Matrix**, then restart Home Assistant.
+3. Go to **Settings → Devices & services → Add integration → Pulse-Eight neo Matrix**.
+   Enter the matrix IP address and, if your firmware requires it, the web UI **admin password** (default `admin`). If Home Assistant has already discovered the matrix, just confirm it under **Discovered**.
+4. Open **neo Matrix** in the sidebar. Start on **Settings** to tidy names, hide unused ports and create output groups.
+
+Options (**Configure**) let you change the poll intervals and turn instant UDP updates on or off.
+
+**Manual:** copy `custom_components/pulse_eight_neo` into `<config>/custom_components/` and restart Home Assistant.
+
+Updates appear under **Settings → Updates** whenever a new release is published.
 
 ## Discovery and instant updates
 
@@ -78,7 +108,6 @@ Everything is local HTTP to port 80, and requests are sent one at a time because
 | Ports (Input / Output / Mirror), type (`HDMI`, `HDMI2`, `HDBT-TXPRO`, `HDBT-TXLITE`), display power (`DPS`) | `GET /Port/List` |
 | Routing, when `Port/List` has no `ReceiveFrom` | `GET /Port/List/Concise` → `{"Output1":[0], …}` |
 | Monitoring link | `GET /Monitoring/Settings` |
-| Status LEDs | `POST /System/StatusLED/{on\|off}` |
 | Link status, MSE per pair, cable length, PoH, display, video format | `GET /Port/Details/{Input\|Output}/{bay}` |
 | HDBaseT receiver details | `GET /Port/RemoteDetails/Output/{bay}` |
 | Route video / audio | `GET /Port/Set/{in}/{out}`, `GET /Audio/Route/{in}/{out}` |
@@ -96,7 +125,6 @@ Everything is local HTTP to port 80, and requests are sent one at a time because
 - Pulse-Eight's open-source control drivers (github.com/Pulse-Eight/drivers: Control4 *neo_Common* and *neoX+*, Crestron Home, Elan, RTI).
 - The protocol notes of **chrisns/pulse-eight-matrix** (MIT), an independent HA integration for these matrices, tested on an FF88 with MatrixOS 3.10.5-1. The UDP packet layout, EDID profile numbers, CEC/IR settings endpoints, `AllowedSources`, the `psu` health list and the capitalised `StatusLED/On|Off` come from there.
 - The neo:X+ manual. The link-quality rule is taken from it.
-
 - The official API reference at monitoring.pulse-eight.com/APIDocs (installer login). Checked in v1.1.0: the `Port/List` fields and types, Mirror ports, `Port/List/Concise`, the CEC On/Off/Volume/Key commands and key table, `System/Details` and `Features`, the LED commands and `Monitoring/Settings`.
 
 **Not yet verified on real hardware** (these pages in the official docs are empty or marked "currently unavailable"):
@@ -119,10 +147,19 @@ I haven't verified these claims. Their advice is to put the matrix on an isolate
 ## Roadmap
 
 1. **CEC.** Done: display power, volume, keys, display and source-device remotes, "turn on when routing" and a power-off option in presets. Next could be a "TV remote" card in the panel.
-2. **ProAudio awareness**, aimed at your setup. The plan:
+2. **ProAudio awareness**, for homes where the matrix feeds a ProAudio. The plan:
    - Let each neo output, or audio output zone A–J, be linked to a ProAudio input in Settings.
    - Expose neo inputs as sources in the ProAudio panel. Picking "Sky Q" for the Kitchen zone would then route Sky Q to a free linked neo output and that output's ProAudio input to the Kitchen zone in one go.
    - The ProAudio integration already exposes `pulse_eight_proaudio.route` for this, and the matrix's own "Linked Device" setting (for the ProAmp8) can be read to suggest the mapping.
+
+## Part of a family
+
+These integrations share the same design, so their panels and entities look and behave alike:
+
+| Integration | What it controls |
+|---|---|
+| [**ProAudio DSP matrix**](https://github.com/AlistairHA/HA-PulseEight-ProAudio) | Multi-zone DSP audio matrix: routing, zone volume/mute/power, presets |
+| [**ProAmp8 amplifier**](https://github.com/AlistairHA/HA-PulseEight-ProAmp) | 8-zone amplifier: per-zone volume, mute and power mode, health |
 
 ## Development
 
@@ -131,3 +168,11 @@ pip install pytest-homeassistant-custom-component
 pytest                                                 # backend tests against a simulated neo:X+
 python tests/fake_neo.py --port 8080 --password admin  # simulator for UI work
 ```
+
+### Releasing
+
+HACS installs from GitHub releases. To publish a change, bump `version` in `custom_components/pulse_eight_neo/manifest.json`, commit, then create a release with a matching tag (for example `v1.2.3`). The included *Release* workflow does this automatically when the version changes on `main` (if the `.github` folder is in the repo). Without any release, HACS shows *"'' is not a usable version"*.
+
+---
+
+Product images © Pulse-Eight Ltd, used with permission. This is an independent project and isn't made, supported or endorsed by Pulse-Eight or the Home Assistant project.
