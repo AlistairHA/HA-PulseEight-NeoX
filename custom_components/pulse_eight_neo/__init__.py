@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 from pathlib import Path
 
 import voluptuous as vol
@@ -37,7 +39,7 @@ from .entity import unit_device
 from .hub import NeoHub
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.BUTTON, Platform.MEDIA_PLAYER, Platform.REMOTE, Platform.SELECT, Platform.SENSOR, Platform.SWITCH]
-VERSION = "1.0.0"
+VERSION = json.loads((Path(__file__).parent / "manifest.json").read_text())["version"]
 type NeoConfigEntry = ConfigEntry[NeoHub]
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
